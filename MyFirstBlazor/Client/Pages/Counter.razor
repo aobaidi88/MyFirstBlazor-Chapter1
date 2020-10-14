@@ -1,0 +1,113 @@
+﻿@page "/counter"
+
+<h1>Counter</h1>
+
+
+<p>
+    Current count:
+    <span class="@backgroundColor">@currentCount</span>
+</p>
+
+
+<p>
+    <input type="number" 
+           @bind="@increment"
+           @onkeypress="KeyHandler"
+           @onkeypress:preventDefault/>
+</p>
+
+<button class="btn btn-primary"
+        disabled="@(currentCount >= 10)"
+        @onclick="@IncrementCount">
+    Click me
+</button>
+
+<button class="btn btn-primary"
+        @onclick="AutoIncrement">Auto Increment</button>
+
+<div style="width: 400px; height: 400px; background: yellow"
+        @onmousemove ="OuterMouseMove">
+    @outerPos
+    <div style="width: 300px; height: 300px; background: green; margin:50px"
+         @onmousemove ="InnerMouseMove" @onmousemove:stopPropagation>
+        @innerPos
+    </div>
+</div>
+
+<p>
+    <h1>Date Format</h1>
+
+    <input @bind="Today" @bind:format="yyyy-MM-dd"/>
+
+    <button class="btn btn-primary"
+            @onclick="IncrementDate">
+        Next Day
+    </button>
+
+</p>
+
+@code {
+    private DateTime Today { get; set; } = DateTime.Now;
+
+    private void IncrementDate()
+    {
+        Today = Today.AddDays(1);
+    }
+
+    private int currentCount = 0;
+    private int increment = 1;
+    string backgroundColor = "red-background";
+
+    private string outerPos = "Nothing yet";
+
+    private void OuterMouseMove(MouseEventArgs e)
+    {
+        outerPos = $"Mouse last at {e.ClientX}x{e.ClientY}";
+    }
+
+    private string innerPos = "Nothing yes";
+
+    private void InnerMouseMove(MouseEventArgs e)
+    {
+        innerPos = $"Mouse last at {e.ClientX}x{e.ClientY}";
+    }
+
+
+    private void KeyHandler(KeyboardEventArgs e)
+    {
+        Console.WriteLine(e.Code);
+        if(e.Key == "+")
+        {
+            increment++;
+        }
+        if(e.Key=="-")
+        {
+            increment--;
+        }
+    }
+
+
+    private void IncrementCount()
+    {
+        Console.WriteLine("++");
+        currentCount += increment;
+
+        backgroundColor = currentCount % 2 == 0 ? "red-background" : "yellow-background";
+    }
+
+    private void AutoIncrement()
+    {
+        var timer = new System.Threading.Timer(
+            callback: TimerCallIncrementCount,
+            state: null,
+            dueTime: TimeSpan.FromSeconds(1),
+            period: TimeSpan.FromSeconds(1));
+    }
+
+    public void TimerCallIncrementCount(object _)
+    {
+        IncrementCount();
+        this.StateHasChanged();
+    }
+
+}
